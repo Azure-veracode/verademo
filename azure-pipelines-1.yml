@@ -42,4 +42,4 @@ stages:
               export VERACODE_API_KEY_ID=$(VERACODE_API_ID)
               export VERACODE_API_KEY_SECRET=$(VERACODE_API_KEY)
               curl -fsS https://tools.veracode.com/veracode-cli/install | sh
-              ./veracode scan --type image --source '$(Build.SourcesDirectory)' --format table 2 >&1 | tee container-scan.json
+              ./veracode scan --type image --source '$(tag)' --format table 2 >&1 | tee container-scan.json
