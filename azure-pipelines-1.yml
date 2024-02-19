@@ -5,6 +5,9 @@
 trigger:
 - main
 
+pool:
+  vmImage: ubuntu-latest
+
 resources:
 - repo: self
 
@@ -18,7 +21,9 @@ steps:
       inputs:
         command: 'build'
         Dockerfile: '**/Dockerfile'
-        tags: '$(tag)'
+        # tags: '$(tag)'
+        tags: |
+          latest
 
     - task: Docker@0
       displayName: 'list contaniers'
