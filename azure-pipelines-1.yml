@@ -12,8 +12,8 @@ resources:
 - repo: self
 
 variables:
-  # tag: '$(Build.BuildId)'
-  tag: 'latest'
+  tag: '$(Build.BuildId)'
+  # tag: 'latest'
   # dockerrepo: 'veracodereg.azurecr.io'
   dockerrepo: 'veraprivate.azurecr.io'
 
@@ -30,7 +30,7 @@ steps:
     - task: Docker@2
       inputs:
         repository: 'veraprivate.azurecr.io'
-        command: 'buildAndPush'
+        command: 'build'
         Dockerfile: '**/Dockerfile'
         tags: '$(tag)'
 
