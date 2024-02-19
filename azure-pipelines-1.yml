@@ -14,8 +14,8 @@ resources:
 variables:
   tag: '$(Build.BuildId)'
   # tag: 'latest'
-  dockerrepo: 'veracodereg.azurecr.io'
-  # dockerrepo: 'veraprivate.azurecr.io'
+  # dockerrepo: 'veracodereg.azurecr.io'
+  dockerrepo: 'veraprivate.azurecr.io'
 
 steps:
     # - task: Docker@2
