@@ -26,9 +26,6 @@ steps:
     #     Dockerfile: '**/Dockerfile'
     #     tags: '$(tag)'
 
-    - task: Docker@2
-      inputs:
-        command: 'login'
 
     - task: Docker@2
       inputs:
