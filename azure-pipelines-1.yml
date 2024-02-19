@@ -9,7 +9,8 @@ resources:
 - repo: self
 
 variables:
-  tag: '$(Build.BuildId)'
+  # tag: '$(Build.BuildId)'
+  tag: 'latest'
 
 stages:
 - stage: Build
@@ -27,19 +28,19 @@ stages:
         Dockerfile: '**/Dockerfile'
         tags: '$(tag)'
 
-    - task: Docker@0
-      displayName: 'list contaniers'
-      inputs:
-        action: 'Run a Docker command'
-        customCommand: 'image ls'
+    # - task: Docker@0
+    #   displayName: 'list contaniers'
+    #   inputs:
+    #     action: 'Run a Docker command'
+    #     customCommand: 'image ls'
 
-    - task: Bash@3
-      displayName: tf Scanner
-      inputs:
-          targetType: inline
-          script: |
-              pwd
-              export VERACODE_API_KEY_ID=$(VERACODE_API_ID)
-              export VERACODE_API_KEY_SECRET=$(VERACODE_API_KEY)
-              curl -fsS https://tools.veracode.com/veracode-cli/install | sh
-              ./veracode scan --type image --source '$(tag)' --format table 2 >&1 | tee container-scan.json
+    # - task: Bash@3
+    #   displayName: tf Scanner
+    #   inputs:
+    #       targetType: inline
+    #       script: |
+    #           pwd
+    #           export VERACODE_API_KEY_ID=$(VERACODE_API_ID)
+    #           export VERACODE_API_KEY_SECRET=$(VERACODE_API_KEY)
+    #           curl -fsS https://tools.veracode.com/veracode-cli/install | sh
+    #           ./veracode scan --type image --source '$(tag)' --format table 2 >&1 | tee container-scan.json
