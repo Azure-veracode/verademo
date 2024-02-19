@@ -19,23 +19,23 @@ variables:
   dockerrepo: 'veraprivate.azurecr.io'
 
 steps:
-    # - task: Docker@2
-    #   displayName: Build an image
-    #   inputs:
-    #     repository: '$(dockerrepo)'
-    #     command: 'build'
-    #     Dockerfile: '**/Dockerfile'
-    #     tags: '$(tag)'
-
-
-
     - task: Docker@2
+      displayName: Build an image
       inputs:
-        containerRegistry: 'azureprivaterepo'
-        repository: 'veraprivate.azurecr.io'
+        repository: '$(dockerrepo)'
         command: 'buildAndPush'
         Dockerfile: '**/Dockerfile'
         tags: '$(tag)'
+
+
+
+    # - task: Docker@2
+    #   inputs:
+    #     containerRegistry: 'azureprivaterepo'
+    #     repository: 'veraprivate.azurecr.io'
+    #     command: 'buildAndPush'
+    #     Dockerfile: '**/Dockerfile'
+    #     tags: '$(tag)'
 
     - task: Docker@0
       displayName: 'list contaniers'
@@ -47,6 +47,7 @@ steps:
       inputs:
         containerRegistry: 'azureprivaterepo'
         command: 'login'
+        
 
     - task: Bash@3
       displayName: tf Scanner
