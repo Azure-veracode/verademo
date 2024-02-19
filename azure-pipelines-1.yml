@@ -26,6 +26,9 @@ steps:
     #     Dockerfile: '**/Dockerfile'
     #     tags: '$(tag)'
 
+    - task: Docker@2
+      inputs:
+        command: 'docker login -u acr-ver -p SnuUsxGODYxIvCRAPQ20d91KpA0zH7ZUGwUCRzV9+n+ACRB6AQww veraprivate.azurecr.io'
 
     - task: Docker@2
       inputs:
