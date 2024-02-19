@@ -30,7 +30,7 @@ steps:
     - task: Docker@2
       inputs:
         repository: 'veraprivate.azurecr.io'
-        command: 'build'
+        command: 'buildAndPush'
         Dockerfile: '**/Dockerfile'
         tags: '$(tag)'
 
