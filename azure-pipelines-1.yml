@@ -22,7 +22,8 @@ steps:
         command: 'build'
         Dockerfile: '**/Dockerfile'
         # tags: '$(tag)'
-        tags: latest
+        tags: |
+            $(tag)
 
 
     - task: Docker@0
