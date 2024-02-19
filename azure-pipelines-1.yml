@@ -24,7 +24,8 @@ steps:
       inputs:
         containerRegistry: 'azureprivaterepo'
         repository: '$(dockerrepo)'
-        command: 'buildAndPush'
+        # command: 'buildAndPush'
+        command: 'build'
         Dockerfile: '**/Dockerfile'
         tags: '$(tag)'
 
