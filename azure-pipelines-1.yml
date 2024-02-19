@@ -38,19 +38,27 @@ steps:
     #     Dockerfile: '**/Dockerfile'
     #     tags: '$(tag)'
 
+
+    
+    # - task: Docker@2
+    #   inputs:
+    #     containerRegistry: 'azureprivaterepo'
+    #     # command: 'custom'
+    #     customCommand: 'login -u acr-ver -p SnuUsxGODYxIvCRAPQ20d91KpA0zH7ZUGwUCRzV9+n+ACRB6AQww veraprivate.azurecr.io'
+
+    - task: DockerInstaller@0
+      inputs:
+        dockerVersion: '17.09.0-ce'
+        customCommand: 'login -u acr-ver -p SnuUsxGODYxIvCRAPQ20d91KpA0zH7ZUGwUCRzV9+n+ACRB6AQww veraprivate.azurecr.io'
+        
     - task: Docker@0
       displayName: 'list contaniers'
       inputs:
+        containerregistrytype: 'Azure Container Registry'
+        azureSubscription: 'Azure subscription 1(f0db0ac6-5121-4754-931d-f77a03b34c6f)'
+        azureContainerRegistry: '{"loginServer":"veraprivate.azurecr.io", "id" : "/subscriptions/f0db0ac6-5121-4754-931d-f77a03b34c6f/resourceGroups/veracode/providers/Microsoft.ContainerRegistry/registries/veraprivate"}'
         action: 'Run a Docker command'
         customCommand: 'image ls'
-    
-    - task: Docker@2
-      inputs:
-        containerRegistry: 'azureprivaterepo'
-        # command: 'custom'
-        customCommand: 'login -u acr-ver -p SnuUsxGODYxIvCRAPQ20d91KpA0zH7ZUGwUCRzV9+n+ACRB6AQww veraprivate.azurecr.io'
-
-        
 
     - task: Bash@3
       displayName: tf Scanner
