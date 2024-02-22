@@ -60,7 +60,20 @@ steps:
               export VERACODE_API_KEY_ID=$(VERACODE_API_ID)
               export VERACODE_API_KEY_SECRET=$(VERACODE_API_KEY)
               curl -fsS https://tools.veracode.com/veracode-cli/install | sh
-              ./veracode scan --type image --source $(dockerrepo):$(tag) --format table 2 >&1 | tee container-scan.json
+              ./veracode scan --type image --source $(dockerrepo):$(tag) --format table 2 >&1 | tee container-scan-docker.json
+
+
+    - task: Bash@3
+      displayName: tf Scanner
+      inputs:
+          targetType: inline
+          script: |
+              pwd
+              export VERACODE_API_KEY_ID=$(VERACODE_API_ID)
+              export VERACODE_API_KEY_SECRET=$(VERACODE_API_KEY)
+              curl -fsS https://tools.veracode.com/veracode-cli/install | sh
+              ./veracode scan --type directory --source '$(Build.SourcesDirectory)' --format table 2 >&1 | tee container-scan-tf.json
+
 
 
     - task: Maven@3
