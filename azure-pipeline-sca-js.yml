@@ -1,0 +1,35 @@
+#This pipeline will zip the java script application and upload it to the veracode portal for scan
+#This pipeline has flaw imported - which will be added in the azure boards
+#$(Build.SourcesDirectory) will take the entire source code of this repo
+
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: '$(Build.SourcesDirectory)'
+    includeRootFolder: true
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId)-js.zip'
+    replaceExistingArchive: true
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId)-js.zip'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
+
+- task: Bash@3
+  displayName: Veracode Pipeline
+  inputs:
+    targetType: 'inline'
+    script: |
+      curl -sSO https://downloads.veracode.com/securityscan/pipeline-scan-LATEST.zip
+      unzip -o pipeline-scan-LATEST.zip
+      java -jar pipeline-scan.jar -vid $(VERACODE_API_ID) -vkey $(VERACODE_API_KEY) -f '$(Build.ArtifactStagingDirectory)/$(Build.BuildId)-js.zip' || true
+- publish: $(System.DefaultWorkingDirectory)/results.json
+  artifact: VeracodeBaseline
