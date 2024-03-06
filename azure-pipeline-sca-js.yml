@@ -43,3 +43,14 @@ steps:
       java -jar pipeline-scan.jar -vid $(VERACODE_API_ID) -vkey $(VERACODE_API_KEY) -f '$(Build.ArtifactStagingDirectory)/$(Build.BuildId)-js.zip' || true
 - publish: $(System.DefaultWorkingDirectory)/results.json
   artifact: VeracodeBaseline
+  
+
+
+- task: Veracode@3
+  inputs:
+    ConnectionDetailsSelection: 'Service Connection'
+    AnalysisService: 'veracode'
+    veracodeAppProfile: 'VeraDemo'
+    version: '$(build.buildNumber)'
+    filepath: '$(build.artifactstagingdirectory)/$(Build.BuildId)-js.zip'
+    maximumWaitTime: '360'
