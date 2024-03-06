@@ -54,3 +54,18 @@ steps:
     version: '$(build.buildNumber)'
     filepath: '$(build.artifactstagingdirectory)/$(Build.BuildId)-js.zip'
     maximumWaitTime: '360'
+    
+- task: Veracode Flaw Importer@3
+  inputs:
+    ConnectionDetailsSelection: 'Service Connection'
+    AnalysisService: 'veracode'
+    veracodeAppProfile: 'VeraDemo'
+    sandboxName: 
+    scanType: 'Static, SCA'
+    importType: 'All Unmitigated Flaws Violating Policy'
+    workItemType: 'Issue'
+    area: '$(system.teamProject)'
+    overwriteAreaPathInWorkItemsOnImport: true
+    iterationPath: '$(system.teamProject)'
+    overwriteIterationPath: true
+    flawImportLimit: '1000'
