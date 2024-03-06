@@ -53,6 +53,7 @@ steps:
     veracodeAppProfile: 'VeraDemo'
     version: '$(build.buildNumber)'
     filepath: '$(build.artifactstagingdirectory)/$(Build.BuildId)-js.zip'
+    importResults: true
     maximumWaitTime: '360'
     
 - task: Veracode Flaw Importer@3
