@@ -20,13 +20,13 @@ variables:
 
 steps:
 
-    - task: Bash@3
-      displayName: 'Veracode SCA scan'
-      inputs:
-        targetType: 'inline'
-        script: |
-              export SRCCLR_API_TOKEN=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDA5NTkyLCJleHAiOjE3MDc5Nzk2MjIsImF1dGhvcml0aWVzIjoiQUdFTlQiLCJqdGkiOiJhNGI0M2YyOC05Yjg0LTRkOTYtOTUzNS1kODdlMTIyZTAzYmYiLCJjbGllbnRfaWQiOiIiLCJzY29wZSI6W119.SSdjSKdzzF--cIzUfvqPd1HtplYWSTsQ-InZqQA5gIMF9TuKAyB2-WRpa_8GhL33jqyNAZsL-nXlSmSVvnSdwk1ZK68bLtWu4RK4F8Cc24Tk4-4kzPTT5ENr8JU_KCIgo3zOYRCutU4jsDheti62bDlKnT6VHnDuheusIjql2us
-              curl -sSL https://download.sourceclear.com/ci.sh | bash -s -- scan --update-advisor
+    # - task: Bash@3
+    #   displayName: 'Veracode SCA scan'
+    #   inputs:
+    #     targetType: 'inline'
+    #     script: |
+    #           export SRCCLR_API_TOKEN=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDA5NTkyLCJleHAiOjE3MDc5Nzk2MjIsImF1dGhvcml0aWVzIjoiQUdFTlQiLCJqdGkiOiJhNGI0M2YyOC05Yjg0LTRkOTYtOTUzNS1kODdlMTIyZTAzYmYiLCJjbGllbnRfaWQiOiIiLCJzY29wZSI6W119.SSdjSKdzzF--cIzUfvqPd1HtplYWSTsQ-InZqQA5gIMF9TuKAyB2-WRpa_8GhL33jqyNAZsL-nXlSmSVvnSdwk1ZK68bLtWu4RK4F8Cc24Tk4-4kzPTT5ENr8JU_KCIgo3zOYRCutU4jsDheti62bDlKnT6VHnDuheusIjql2us
+    #           curl -sSL https://download.sourceclear.com/ci.sh | bash -s -- scan --update-advisor
 
 
     - task: Docker@2
@@ -86,26 +86,26 @@ steps:
 
 
 
-    - task: Maven@3
-      displayName: Build with Maven
-      inputs:
-        mavenPomFile: 'app/pom.xml'
-        mavenOptions: '-Xmx3072m'
-        javaHomeOption: 'JDKVersion'
-        jdkVersionOption: '1.8'
-        jdkArchitectureOption: 'x64'
-        publishJUnitResults: true
-        testResultsFiles: '**/surefire-reports/TEST-*.xml'
-        goals: 'package'
-    - task: Bash@3
-      displayName: Veracode Pipeline
-      inputs:
-        targetType: 'inline'
-        script: |
-          curl -sSO https://downloads.veracode.com/securityscan/pipeline-scan-LATEST.zip
-          unzip -o pipeline-scan-LATEST.zip
-          java -jar pipeline-scan.jar -vid $(VERACODE_API_ID) -vkey $(VERACODE_API_KEY) -f /home/vsts/work/1/s/app/target/verademo.war || true
-    - publish: $(System.DefaultWorkingDirectory)/results.json
-      artifact: VeracodeBaseline
+    # - task: Maven@3
+    #   displayName: Build with Maven
+    #   inputs:
+    #     mavenPomFile: 'app/pom.xml'
+    #     mavenOptions: '-Xmx3072m'
+    #     javaHomeOption: 'JDKVersion'
+    #     jdkVersionOption: '1.8'
+    #     jdkArchitectureOption: 'x64'
+    #     publishJUnitResults: true
+    #     testResultsFiles: '**/surefire-reports/TEST-*.xml'
+    #     goals: 'package'
+    # - task: Bash@3
+    #   displayName: Veracode Pipeline
+    #   inputs:
+    #     targetType: 'inline'
+    #     script: |
+    #       curl -sSO https://downloads.veracode.com/securityscan/pipeline-scan-LATEST.zip
+    #       unzip -o pipeline-scan-LATEST.zip
+    #       java -jar pipeline-scan.jar -vid $(VERACODE_API_ID) -vkey $(VERACODE_API_KEY) -f /home/vsts/work/1/s/app/target/verademo.war || true
+    # - publish: $(System.DefaultWorkingDirectory)/results.json
+    #   artifact: VeracodeBaseline
 
 #test
