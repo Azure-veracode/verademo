@@ -56,6 +56,7 @@ steps:
     #     customCommand: 'login -u acr-ver -p SnuUsxGODYxIvCRAPQ20d91KpA0zH7ZUGwUCRzV9+n+ACRB6AQww veraprivate.azurecr.io'
 
     
+    # Back up is at the end of the page
     - task: Docker@0
       displayName: 'list contaniers'
       inputs:
@@ -70,19 +71,20 @@ steps:
               export VERACODE_API_KEY_ID=$(VERACODE_API_ID)
               export VERACODE_API_KEY_SECRET=$(VERACODE_API_KEY)
               curl -fsS https://tools.veracode.com/veracode-cli/install | sh
-              ./veracode scan --type image --source $(dockerrepo):$(tag) --format table 2 >&1 | tee container-scan-docker.json
+              ./veracode scan --type image --source $(dockerrepo):$(tag) 
+            # ./veracode scan --type image --source $(dockerrepo):$(tag) --format table 2 >&1 | tee container-scan-docker.json
 
-
-    - task: Bash@3
-      displayName: tf Scanner
-      inputs:
-          targetType: inline
-          script: |
-              pwd
-              export VERACODE_API_KEY_ID=$(VERACODE_API_ID)
-              export VERACODE_API_KEY_SECRET=$(VERACODE_API_KEY)
-              curl -fsS https://tools.veracode.com/veracode-cli/install | sh
-              ./veracode scan --type directory --source '$(Build.SourcesDirectory)' --format table 2 >&1 | tee container-scan-tf.json
+    # This scan will take the entire source code and scan the entire repo for the terraform vul
+    # - task: Bash@3
+    #   displayName: tf Scanner
+    #   inputs:
+    #       targetType: inline
+    #       script: |
+    #           pwd
+    #           export VERACODE_API_KEY_ID=$(VERACODE_API_ID)
+    #           export VERACODE_API_KEY_SECRET=$(VERACODE_API_KEY)
+    #           curl -fsS https://tools.veracode.com/veracode-cli/install | sh
+    #           ./veracode scan --type directory --source '$(Build.SourcesDirectory)' --format table 2 >&1 | tee container-scan-tf.json
 
 
 
@@ -109,3 +111,20 @@ steps:
     #   artifact: VeracodeBaseline
 
 #test1
+
+# Backup of the container scan which I'm gonna edit 
+#     - task: Docker@0
+#       displayName: 'list contaniers'
+#       inputs:
+#         action: 'Run a Docker command'
+#         customCommand: 'image ls'
+#     - task: Bash@3
+#       displayName: tf Scanner
+#       inputs:
+#           targetType: inline
+#           script: |
+#               pwd
+#               export VERACODE_API_KEY_ID=$(VERACODE_API_ID)
+#               export VERACODE_API_KEY_SECRET=$(VERACODE_API_KEY)
+#               curl -fsS https://tools.veracode.com/veracode-cli/install | sh
+#               ./veracode scan --type image --source $(dockerrepo):$(tag) --format table 2 >&1 | tee container-scan-docker.json
