@@ -71,7 +71,7 @@ steps:
               export VERACODE_API_KEY_ID=$(VERACODE_API_ID)
               export VERACODE_API_KEY_SECRET=$(VERACODE_API_KEY)
               curl -fsS https://tools.veracode.com/veracode-cli/install | sh
-              ./veracode scan --type image --source $(dockerrepo):$(tag) 
+              ./veracode scan --type image --source $(dockerrepo):$(tag) --format json -o results.json
             # ./veracode scan --type image --source $(dockerrepo):$(tag) --format table 2 >&1 | tee container-scan-docker.json
 
     # This scan will take the entire source code and scan the entire repo for the terraform vul
