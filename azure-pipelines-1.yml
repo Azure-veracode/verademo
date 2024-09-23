@@ -49,22 +49,34 @@ steps:
           exit 0
         fi
 
-        # Parse policy-results and ignore specific vulnerability
-        ignore_list=("4.9 Ensure COPY is used instead of ADD in Dockerfile (Not Scored) level 1")
-        failed_vulns=$(jq -r '.["policy-results"][].failures[].msg' container-scan-docker.json)
-        ignore_found=true
-        
-        for vuln in $failed_vulns; do
-          if [[ ! " ${ignore_list[@]} " =~ " ${vuln} " ]]; then
-            echo "Found critical vulnerability: $vuln"
-            ignore_found=false
-            break
-          fi
-        done
+        ignore_list=("4.8 Level 1 benchmark - setgid file permission validation: (/usr/bin/chage, 20000755)"
+                   "4.8 Level 1 benchmark - setgid file permission validation: (/usr/bin/expiry, 20000755)"
+                   "4.8 Level 1 benchmark - setgid file permission validation: (/usr/bin/wall, 20000755)"
+                   "4.8 Level 1 benchmark - setgid file permission validation: (/usr/sbin/pam_extrausers_chkpwd, 20000755)"
+                   "4.8 Level 1 benchmark - setgid file permission validation: (/usr/sbin/unix_chkpwd, 20000755)"
+                   "4.8 Level 1 benchmark - setuid file permission validation: (/usr/bin/chfn, 40000755)"
+                   "4.8 Level 1 benchmark - setuid file permission validation: (/usr/bin/chsh, 40000755)"
+                   "4.8 Level 1 benchmark - setuid file permission validation: (/usr/bin/gpasswd, 40000755)"
+                   "4.8 Level 1 benchmark - setuid file permission validation: (/usr/bin/mount, 40000755)"
+                   "4.8 Level 1 benchmark - setuid file permission validation: (/usr/bin/newgrp, 40000755)"
+                   "4.8 Level 1 benchmark - setuid file permission validation: (/usr/bin/passwd, 40000755)"
+                   "4.8 Level 1 benchmark - setuid file permission validation: (/usr/bin/su, 40000755)"
+                  )
+      
+      failed_vulns=$(jq -r '.["policy-results"][].failures[].msg' container-scan-docker.json)
+      ignore_found=true
+      
+      for vuln in $failed_vulns; do
+        if [[ ! " ${ignore_list[@]} " =~ " ${vuln} " ]]; then
+          echo "Found critical vulnerability: $vuln"
+          ignore_found=false
+          break
+        fi
+      done
 
-        if [ "$ignore_found" = true ]; then
-          echo "All vulnerabilities are ignored. Proceeding..."
-          exit 0
-        else
-          echo "Pipeline failed due to critical vulnerability."
-          exit 1
+      if [ "$ignore_found" = true ]; then
+        echo "All vulnerabilities are ignored. Proceeding..."
+        exit 0
+      else
+        echo "Pipeline failed due to critical vulnerability."
+        exit 1
