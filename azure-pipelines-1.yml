@@ -22,23 +22,24 @@ steps:
         export VERACODE_API_KEY_ID=$(VERACODE_API_ID)
         export VERACODE_API_KEY_SECRET=$(VERACODE_API_KEY)
         curl -fsS https://tools.veracode.com/veracode-cli/install | sh
-        ./veracode scan --type image --source alpine:latest --format json --output container-scan-docker.json
+        ./veracode scan --type image --source alpine:latest --format json --output-file container-scan-docker.json
+        
+        # Optional: Save the JSON file as a build artifact
+        echo "##vso[task.uploadfile]container-scan-docker.json"
 
   - task: Bash@3
     displayName: Parse Veracode JSON Results
     inputs:
       targetType: inline
       script: |
-        # Parse the JSON and check for the ignored vulnerability
-        result=$(jq -r '.["policy-results"][] | select(.type == "Docker" and .message == "Ensure COPY is used instead of ADD in Dockerfile (Not Scored) level 1")' container-scan-docker.json)
-        
-        # If the vulnerability is found, ignore it
-        if [ -z "$result" ]; then
-          echo "No non-ignored vulnerabilities found. Policy passed."
+        # Parse JSON and ignore "Ensure COPY is used instead of ADD in Dockerfile"
+        failures=$(jq -r '.["policy-results"][] | .failures[] | select(.msg != "docker.rego failed - 4.9 Ensure COPY is used instead of ADD in Dockerfile (Not Scored) level 1")' container-scan-docker.json)
+
+        # Check if any remaining failures exist
+        if [ -z "$failures" ]; then
+          echo "All remaining vulnerabilities are ignored. Policy passed."
           exit 0
         else
-          echo "Policy failed due to non-ignored vulnerabilities."
+          echo "Other non-ignored vulnerabilities found: $failures"
           exit 1
         fi
-
-      # ./veracode scan --type image --source $(dockerrepo):$(tag) --format table 2 >&1 | tee container-scan-docker.json
