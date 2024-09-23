@@ -75,6 +75,7 @@ steps:
                 exit 0
               else
                 echo "Pipeline failed due to critical vulnerability."
+                exit 1
 
 
 
