@@ -25,7 +25,7 @@ steps:
         ./veracode scan --type image --source alpine:latest --format json --output container-scan-docker.json
         
         # Optional: Save the JSON file as a build artifact
-        echo "##vso[task.uploadfile]container-scan-docker.json"
+        # echo "##vso[task.uploadfile]container-scan-docker.json"
 
   - task: Bash@3
     displayName: Parse Veracode JSON Results
