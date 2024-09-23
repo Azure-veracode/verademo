@@ -51,9 +51,7 @@ steps:
         fi
 
         ignore_list=("4.8 Level 1 benchmark - setgid file permission validation: (/usr/bin/chage, 20000755)"
-                   "4.8 Level 1 benchmark - setgid file permission validation: (/usr/bin/expiry, 20000755)"
-                   "4.8 Level 1 benchmark - setuid file permission validation: (/usr/bin/su, 40000755)"
-                  )
+                    )
       
         failed_vulns=$(jq -r '.["policy-results"][].failures[].msg' container-scan-docker.json)
         ignore_found=true
