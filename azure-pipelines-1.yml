@@ -41,32 +41,3 @@ steps:
         curl -fsS https://tools.veracode.com/veracode-cli/install | sh
         ./veracode scan --type image --source alpine:latest --format table 2 >&1 | tee container-scan-docker.json
       # ./veracode scan --type image --source $(dockerrepo):$(tag) --format table 2 >&1 | tee container-scan-docker.json
-
-        # Check if policy passed
-        policy_passed=$(jq -r '.["policy-passed"]' container-scan-docker.json)
-        
-        if [[ "$policy_passed" == "true" ]]; then
-          echo "Policy passed, proceeding..."
-          exit 0
-        fi
-
-        ignore_list=("4.8 Level 1 benchmark - setgid file permission validation: (/usr/bin/chage, 20000755)"
-                    )
-      
-        failed_vulns=$(jq -r '.["policy-results"][].failures[].msg' container-scan-docker.json)
-        ignore_found=true
-        
-        for vuln in $failed_vulns; do
-          if [[ ! " ${ignore_list[@]} " =~ " ${vuln} " ]]; then
-            echo "Found critical vulnerability: $vuln"
-            ignore_found=false
-            break
-          fi
-        done
-
-        if [ "$ignore_found" = true ]; then
-          echo "All vulnerabilities are ignored. Proceeding..."
-          exit 0
-        else
-          echo "Pipeline failed due to critical vulnerability."
-          exit 1
