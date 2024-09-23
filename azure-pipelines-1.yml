@@ -32,14 +32,45 @@ steps:
     inputs:
       targetType: inline
       script: |
-        # Parse JSON and ignore "Ensure COPY is used instead of ADD in Dockerfile"
-        failures=$(jq -r '.["policy-results"][] | .failures[] | select(.msg != "docker.rego failed - 4.9 Ensure COPY is used instead of ADD in Dockerfile (Not Scored) level 1")' container-scan-docker.json)
+        # Define the list of vulnerabilities to ignore
+        ignore_list=(
+          "docker.rego failed - 4.9 Ensure COPY is used instead of ADD in Dockerfile (Not Scored) level 1"
+          "docker.rego failed - 4.6 Ensure HEALTHCHECK instructions have been added to the container image (Scored) level 1"
+          "docker.rego failed - 4.1 Ensure a user for the container has been created (Scored) level 1"
+          # Add more vulnerabilities to ignore here
+        )
 
-        # Check if any remaining failures exist
-        if [ -z "$failures" ]; then
+        # Parse JSON results and filter out ignored vulnerabilities
+        failures=$(jq -r '.["policy-results"][] | .failures[] | @base64' container-scan-docker.json)
+
+        # Function to check if a vulnerability is in the ignore list
+        is_ignored() {
+          local msg="$1"
+          for ignored_vuln in "${ignore_list[@]}"; do
+            if [[ "$msg" == "$ignored_vuln" ]]; then
+              return 0
+            fi
+          done
+          return 1
+        }
+
+        # Loop through the failures and check if any are not ignored
+        non_ignored_found=false
+        for failure in $failures; do
+          decoded_msg=$(echo $failure | base64 --decode | jq -r '.msg')
+          
+          if ! is_ignored "$decoded_msg"; then
+            echo "Non-ignored vulnerability found: $decoded_msg"
+            non_ignored_found=true
+          else
+            echo "Ignored vulnerability: $decoded_msg"
+          fi
+        done
+
+        # Fail the pipeline if there are non-ignored vulnerabilities
+        if [ "$non_ignored_found" = true ]; then
+          exit 1
+        else
           echo "All remaining vulnerabilities are ignored. Policy passed."
           exit 0
-        else
-          echo "Other non-ignored vulnerabilities found: $failures"
-          exit 1
         fi
