@@ -1,7 +1,3 @@
-# Docker
-# Build a Docker image
-# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
-
 trigger:
 - main
 
@@ -20,80 +16,55 @@ variables:
 
 steps:
 
+  - task: Docker@2
+    displayName: Build an image
+    inputs:
+      repository: '$(dockerrepo)'
+      command: 'build'
+      Dockerfile: '**/Dockerfile'
+      tags: '$(tag)'
 
-    - task: Docker@2
-      displayName: Build an image
-      inputs:
-        repository: '$(dockerrepo)'
-        command: 'build'
-        Dockerfile: '**/Dockerfile'
-        tags: '$(tag)'
+  - task: Docker@0
+    displayName: 'list containers'
+    inputs:
+      action: 'Run a Docker command'
+      customCommand: 'image ls'
 
+  - task: Bash@3
+    displayName: tf Scanner
+    inputs:
+      targetType: inline
+      script: |
+        pwd
+        export VERACODE_API_KEY_ID=$(VERACODE_API_ID)
+        export VERACODE_API_KEY_SECRET=$(VERACODE_API_KEY)
+        curl -fsS https://tools.veracode.com/veracode-cli/install | sh
+        ./veracode scan --type image --source $(dockerrepo):$(tag) --format table 2 >&1 | tee container-scan-docker.json
 
-    
-    # Back up is at the end of the page
-    - task: Docker@0
-      displayName: 'list contaniers'
-      inputs:
-        action: 'Run a Docker command'
-        customCommand: 'image ls'
-    - task: Bash@3
-      displayName: tf Scanner
-      inputs:
-          targetType: inline
-          script: |
-              pwd
-              export VERACODE_API_KEY_ID=$(VERACODE_API_ID)
-              export VERACODE_API_KEY_SECRET=$(VERACODE_API_KEY)
-              curl -fsS https://tools.veracode.com/veracode-cli/install | sh
-              ./veracode scan --type image --source $(dockerrepo):$(tag) --format table 2 >&1 | tee container-scan-docker.json
-            # ./veracode scan --type image --source $(dockerrepo):$(tag) --format table 2 >&1 | tee container-scan-docker.json
+        # Check if policy passed
+        policy_passed=$(jq -r '.["policy-passed"]' container-scan-docker.json)
+        
+        if [[ "$policy_passed" == "true" ]]; then
+          echo "Policy passed, proceeding..."
+          exit 0
+        fi
 
-              # Check if policy passed
-              policy_passed=$(jq -r '.["policy-passed"]' container-scan-docker.json)
-              
-              if [[ "$policy_passed" == "true" ]]; then
-                echo "Policy passed, proceeding..."
-                exit 0
-              fi
+        # Parse policy-results and ignore specific vulnerability
+        ignore_list=("4.9 Ensure COPY is used instead of ADD in Dockerfile (Not Scored) level 1")
+        failed_vulns=$(jq -r '.["policy-results"][].failures[].msg' container-scan-docker.json)
+        ignore_found=true
+        
+        for vuln in $failed_vulns; do
+          if [[ ! " ${ignore_list[@]} " =~ " ${vuln} " ]]; then
+            echo "Found critical vulnerability: $vuln"
+            ignore_found=false
+            break
+          fi
+        done
 
-              # Parse policy-results and ignore specific vulnerability
-              ignore_list=("4.9 Ensure COPY is used instead of ADD in Dockerfile (Not Scored) level 1")
-              failed_vulns=$(jq -r '.["policy-results"][].failures[].msg' container-scan-docker.json)
-              ignore_found=true
-              
-              for vuln in $failed_vulns; do
-                if [[ ! " ${ignore_list[@]} " =~ " ${vuln} " ]]; then
-                  echo "Found critical vulnerability: $vuln"
-                  ignore_found=false
-                  break
-                fi
-              done
-
-              if [ "$ignore_found" = true ]; then
-                echo "All vulnerabilities are ignored. Proceeding..."
-                exit 0
-              else
-                echo "Pipeline failed due to critical vulnerability."
-                exit 1
-
-
-
-#test1
-
-# Backup of the container scan which I'm gonna edit 
-#     - task: Docker@0
-#       displayName: 'list contaniers'
-#       inputs:
-#         action: 'Run a Docker command'
-#         customCommand: 'image ls'
-#     - task: Bash@3
-#       displayName: tf Scanner
-#       inputs:
-#           targetType: inline
-#           script: |
-#               pwd
-#               export VERACODE_API_KEY_ID=$(VERACODE_API_ID)
-#               export VERACODE_API_KEY_SECRET=$(VERACODE_API_KEY)
-#               curl -fsS https://tools.veracode.com/veracode-cli/install | sh
-#               ./veracode scan --type image --source $(dockerrepo):$(tag) --format table 2 >&1 | tee container-scan-docker.json
+        if [ "$ignore_found" = true ]; then
+          echo "All vulnerabilities are ignored. Proceeding..."
+          exit 0
+        else
+          echo "Pipeline failed due to critical vulnerability."
+          exit 1
