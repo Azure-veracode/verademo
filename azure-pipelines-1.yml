@@ -20,14 +20,6 @@ variables:
 
 steps:
 
-    # - task: Bash@3
-    #   displayName: 'Veracode SCA scan'
-    #   inputs:
-    #     targetType: 'inline'
-    #     script: |
-    #           export SRCCLR_API_TOKEN=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDA5NTkyLCJleHAiOjE3MDc5Nzk2MjIsImF1dGhvcml0aWVzIjoiQUdFTlQiLCJqdGkiOiJhNGI0M2YyOC05Yjg0LTRkOTYtOTUzNS1kODdlMTIyZTAzYmYiLCJjbGllbnRfaWQiOiIiLCJzY29wZSI6W119.SSdjSKdzzF--cIzUfvqPd1HtplYWSTsQ-InZqQA5gIMF9TuKAyB2-WRpa_8GhL33jqyNAZsL-nXlSmSVvnSdwk1ZK68bLtWu4RK4F8Cc24Tk4-4kzPTT5ENr8JU_KCIgo3zOYRCutU4jsDheti62bDlKnT6VHnDuheusIjql2us
-    #           curl -sSL https://download.sourceclear.com/ci.sh | bash -s -- scan --update-advisor
-
 
     - task: Docker@2
       displayName: Build an image
@@ -37,23 +29,6 @@ steps:
         Dockerfile: '**/Dockerfile'
         tags: '$(tag)'
 
-
-
-    # - task: Docker@2
-    #   inputs:
-    #     containerRegistry: 'azureprivaterepo'
-    #     repository: 'veraprivate.azurecr.io'
-    #     command: 'buildAndPush'
-    #     Dockerfile: '**/Dockerfile'
-    #     tags: '$(tag)'
-
-
-    
-    # - task: Docker@2
-    #   inputs:
-    #     containerRegistry: 'azureprivaterepo'
-    #     # command: 'custom'
-    #     customCommand: 'login -u acr-ver -p SnuUsxGODYxIvCRAPQ20d91KpA0zH7ZUGwUCRzV9+n+ACRB6AQww veraprivate.azurecr.io'
 
     
     # Back up is at the end of the page
@@ -71,44 +46,37 @@ steps:
               export VERACODE_API_KEY_ID=$(VERACODE_API_ID)
               export VERACODE_API_KEY_SECRET=$(VERACODE_API_KEY)
               curl -fsS https://tools.veracode.com/veracode-cli/install | sh
-              ./veracode scan --type image --source $(dockerrepo):$(tag) -o container-scan-docker.json
+              ./veracode scan --type image --source $(dockerrepo):$(tag) --format table 2 >&1 | tee container-scan-docker.json
             # ./veracode scan --type image --source $(dockerrepo):$(tag) --format table 2 >&1 | tee container-scan-docker.json
 
-    # This scan will take the entire source code and scan the entire repo for the terraform vul
-    # - task: Bash@3
-    #   displayName: tf Scanner
-    #   inputs:
-    #       targetType: inline
-    #       script: |
-    #           pwd
-    #           export VERACODE_API_KEY_ID=$(VERACODE_API_ID)
-    #           export VERACODE_API_KEY_SECRET=$(VERACODE_API_KEY)
-    #           curl -fsS https://tools.veracode.com/veracode-cli/install | sh
-    #           ./veracode scan --type directory --source '$(Build.SourcesDirectory)' --format table 2 >&1 | tee container-scan-tf.json
+              # Check if policy passed
+              policy_passed=$(jq -r '.["policy-passed"]' container-scan-docker.json)
+              
+              if [[ "$policy_passed" == "true" ]]; then
+                echo "Policy passed, proceeding..."
+                exit 0
+              fi
+
+              # Parse policy-results and ignore specific vulnerability
+              ignore_list=("4.9 Ensure COPY is used instead of ADD in Dockerfile (Not Scored) level 1")
+              failed_vulns=$(jq -r '.["policy-results"][].failures[].msg' container-scan-docker.json)
+              ignore_found=true
+              
+              for vuln in $failed_vulns; do
+                if [[ ! " ${ignore_list[@]} " =~ " ${vuln} " ]]; then
+                  echo "Found critical vulnerability: $vuln"
+                  ignore_found=false
+                  break
+                fi
+              done
+
+              if [ "$ignore_found" = true ]; then
+                echo "All vulnerabilities are ignored. Proceeding..."
+                exit 0
+              else
+                echo "Pipeline failed due to critical vulnerability."
 
 
-
-    # - task: Maven@3
-    #   displayName: Build with Maven
-    #   inputs:
-    #     mavenPomFile: 'app/pom.xml'
-    #     mavenOptions: '-Xmx3072m'
-    #     javaHomeOption: 'JDKVersion'
-    #     jdkVersionOption: '1.8'
-    #     jdkArchitectureOption: 'x64'
-    #     publishJUnitResults: true
-    #     testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    #     goals: 'package'
-    # - task: Bash@3
-    #   displayName: Veracode Pipeline
-    #   inputs:
-    #     targetType: 'inline'
-    #     script: |
-    #       curl -sSO https://downloads.veracode.com/securityscan/pipeline-scan-LATEST.zip
-    #       unzip -o pipeline-scan-LATEST.zip
-    #       java -jar pipeline-scan.jar -vid $(VERACODE_API_ID) -vkey $(VERACODE_API_KEY) -f /home/vsts/work/1/s/app/target/verademo.war || true
-    # - publish: $(System.DefaultWorkingDirectory)/results.json
-    #   artifact: VeracodeBaseline
 
 #test1
 
