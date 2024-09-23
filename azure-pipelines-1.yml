@@ -63,20 +63,20 @@ steps:
                    "4.8 Level 1 benchmark - setuid file permission validation: (/usr/bin/su, 40000755)"
                   )
       
-      failed_vulns=$(jq -r '.["policy-results"][].failures[].msg' container-scan-docker.json)
-      ignore_found=true
-      
-      for vuln in $failed_vulns; do
-        if [[ ! " ${ignore_list[@]} " =~ " ${vuln} " ]]; then
-          echo "Found critical vulnerability: $vuln"
-          ignore_found=false
-          break
-        fi
-      done
+        failed_vulns=$(jq -r '.["policy-results"][].failures[].msg' container-scan-docker.json)
+        ignore_found=true
+        
+        for vuln in $failed_vulns; do
+          if [[ ! " ${ignore_list[@]} " =~ " ${vuln} " ]]; then
+            echo "Found critical vulnerability: $vuln"
+            ignore_found=false
+            break
+          fi
+        done
 
-      if [ "$ignore_found" = true ]; then
-        echo "All vulnerabilities are ignored. Proceeding..."
-        exit 0
-      else
-        echo "Pipeline failed due to critical vulnerability."
-        exit 1
+        if [ "$ignore_found" = true ]; then
+          echo "All vulnerabilities are ignored. Proceeding..."
+          exit 0
+        else
+          echo "Pipeline failed due to critical vulnerability."
+          exit 1
