@@ -22,7 +22,7 @@ steps:
         export VERACODE_API_KEY_ID=$(VERACODE_API_ID)
         export VERACODE_API_KEY_SECRET=$(VERACODE_API_KEY)
         curl -fsS https://tools.veracode.com/veracode-cli/install | sh
-        ./veracode scan --type image --source alpine:latest --format json 2 >&1 | tee container-scan-docker.json
+        ./veracode scan --type image --source alpine:latest --format json --output container-scan-docker.json
 
   - task: Bash@3
     displayName: Parse Veracode JSON Results
