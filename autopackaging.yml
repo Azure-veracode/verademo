@@ -31,6 +31,6 @@ steps:
     AnalysisService: 'Veracode-Arun-GM'
     veracodeAppProfile: 'Recent-1'
     version: '$(build.buildNumber)'
-    filepath: '$(Build.ArtifactStagingDirectory)/verascan'
+    filepath: './verascan'
     importResults: true
     maximumWaitTime: '360'
