@@ -18,3 +18,9 @@ steps:
         echo "Error: verascan directory not found."
         exit 1
       fi
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Verascan Artifact'
+  inputs:
+    pathToPublish: 'verascan'
+    artifactName: 'VeracodeScanResults'
