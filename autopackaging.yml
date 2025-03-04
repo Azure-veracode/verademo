@@ -24,3 +24,13 @@ steps:
   inputs:
     pathToPublish: 'verascan'
     artifactName: 'VeracodeScanResults'
+
+- task: Veracode@3
+  inputs:
+    ConnectionDetailsSelection: 'Service Connection'
+    AnalysisService: 'Veracode-Arun-GM'
+    veracodeAppProfile: 'Recent-1'
+    version: '$(build.buildNumber)'
+    filepath: '$(Build.ArtifactStagingDirectory)/verascan'
+    importResults: true
+    maximumWaitTime: '360'
