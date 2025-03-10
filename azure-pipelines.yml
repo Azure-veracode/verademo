@@ -35,4 +35,5 @@ steps:
     version: '$(build.buildNumber)'
     filepath: './verascan'
     importResults: true
+    failBuildOnPolicyFail: true
     maximumWaitTime: '360'
