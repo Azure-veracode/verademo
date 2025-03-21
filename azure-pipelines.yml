@@ -96,7 +96,7 @@ steps:
     version: '$(build.buildNumber)'
     filepath: '${{parameters.passed_jar_folder}}'
     optargs: '-policy DPW-Veracode-Recommended-SAST-SCA-V2 -teams Test -toplevel true -includenewmodules true'
-    createProfile: true
+    createProfile: 'true'
     failBuildIfUploadAndScanBuildStepFails: true
     importResults: true
     failBuildOnPolicyFail: true
