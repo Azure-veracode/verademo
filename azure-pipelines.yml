@@ -89,20 +89,38 @@ steps:
 # Step 7: Run Veracode Policy Scan
 - task: Veracode@3
   inputs:
-    ConnectionDetailsSelection: 'Credentials' # 'Endpoint' if service connection is used
+    ConnectionDetailsSelection: 'Credentials'
     apiId: '${{parameters.vc_api_id}}'
     apiKey: '${{parameters.vc_api_key}}'
-    veracodeAppProfile: '$(Retrieving_applicaton_name.app_profile_name)' # App-Profile based on project/repo
+    veracodeAppProfile: '$(Retrieving_applicaton_name.app_profile_name)'
     version: '$(build.buildNumber)'
     filepath: '${{parameters.passed_jar_folder}}'
-    createProfile: 'true'
-    optargs: '-policy DPW-Veracode-Recommended-SAST-SCA-V2 -teams DPW_Security'
+    optargs: '-policy DPW-Veracode-Recommended-SAST-SCA-V2 -teams Test -toplevel true -includenewmodules true'
+    createProfile: true
     failBuildIfUploadAndScanBuildStepFails: true
     importResults: true
     failBuildOnPolicyFail: true
-    maximumWaitTime: '1440' # 24 hours
-    toplevel : true
-    includenewmodules : true
-    deleteincompletescan: 0
+    maximumWaitTime: '1440'
   displayName: POLICY SCAN
   condition: succeededOrFailed()
+
+# Bckup script
+# - task: Veracode@3
+#   inputs:
+#     ConnectionDetailsSelection: 'Credentials' # 'Endpoint' if service connection is used
+#     apiId: '${{parameters.vc_api_id}}'
+#     apiKey: '${{parameters.vc_api_key}}'
+#     veracodeAppProfile: '$(Retrieving_applicaton_name.app_profile_name)' # App-Profile based on project/repo
+#     version: '$(build.buildNumber)'
+#     filepath: '${{parameters.passed_jar_folder}}'
+#     createProfile: 'true'
+#     optargs: '-policy DPW-Veracode-Recommended-SAST-SCA-V2 -teams DPW_Security'
+#     failBuildIfUploadAndScanBuildStepFails: true
+#     importResults: true
+#     failBuildOnPolicyFail: true
+#     maximumWaitTime: '1440' # 24 hours
+#     toplevel : true
+#     includenewmodules : true
+#     deleteincompletescan: 0
+#   displayName: POLICY SCAN
+#   condition: succeededOrFailed()
