@@ -95,7 +95,7 @@ steps:
     veracodeAppProfile: '$(Retrieving_applicaton_name.app_profile_name)'
     version: '$(build.buildNumber)'
     filepath: '${{parameters.passed_jar_folder}}'
-    optargs: '-policy DPW-Veracode-Recommended-SAST-SCA-V2 -teams Test -toplevel true -includenewmodules true'
+    optargs: '-policy DPW-Veracode-Recommended-SAST-SCA-V2 -teams Test -toplevel true -includenewmodules true -deleteincompletescan 1 -scanallnonfataltoplevelmodules true'
     createProfile: true
     failBuildIfUploadAndScanBuildStepFails: true
     importResults: true
