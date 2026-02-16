@@ -30,7 +30,7 @@ steps:
 - task: Veracode@3
   inputs:
     ConnectionDetailsSelection: 'Service Connection'
-    AnalysisService: 'Veracode-Arun-GM'
+    AnalysisService: 'veracode'
     veracodeAppProfile: 'Mashreq Test'
     version: '$(build.buildNumber)'
     filepath: './verascan'
